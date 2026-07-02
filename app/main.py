@@ -2,14 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.routes import auth, commercants, abonnements, produits, negotiation, dashboard, paiement, whatsapp
 from app.database.database import Base, engine
+from app.models import commercant, produit, conversation, abonnement, commande
 
-# Créer les tables automatiquement
+# Creer les tables automatiquement
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="NégociaBot API",
+    title="NegociaBot API",
     description="Systeme IA de negociation - Cameroun",
-    version="3.0.0"
+    version="4.0.0"
 )
 
 app.add_middleware(
@@ -20,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Inclure les routes
 app.include_router(auth.router)
 app.include_router(commercants.router)
 app.include_router(abonnements.router)
@@ -34,14 +34,18 @@ app.include_router(whatsapp.router)
 @app.get("/")
 def root():
     return {
-        "projet": "NégociaBot",
-        "version": "3.0.0",
+        "projet": "NegociaBot",
+        "version": "4.0.0",
         "statut": "actif",
         "message": "Bot de negociation IA operationnel !",
-        "integrations": {
-            "mtn_momo": "actif",
-            "whatsapp_business": "actif"
-        }
+        "nouveautes": [
+            "Negociation naturelle amelioree",
+            "Collecte infos client apres accord",
+            "Calcul frais livraison par zone Douala",
+            "Option retrait en boutique",
+            "Generation facture automatique",
+            "Notification commercant WhatsApp"
+        ]
     }
 
 
