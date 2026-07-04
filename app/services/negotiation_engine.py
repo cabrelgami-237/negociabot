@@ -7,8 +7,7 @@ from app.models.commercant import Commercant
 from app.models.commande import Commande
 from app.services.livraison_service import calculer_frais_livraison, get_adresse_boutique
 from app.services.facture_service import generer_numero_facture, envoyer_facture_client, envoyer_notification_commercant
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+from app.services.gemini_service import reformuler_reponse
 
 ETAPE_NEGOCIATION = "negociation"
 ETAPE_CHOIX = "choix_recuperation"
@@ -43,22 +42,34 @@ def decider_strategie(prix_propose, produit, nb_tours):
 
 
 def generer_reponse_negociation(message_client, produit, strategie, prix_propose, nb_tours):
+    """
+    Genere la reponse du moteur a regles, puis la fait reformuler par Gemini
+    pour un ton plus naturel. Retourne (resultat, reponse, contre_offre, decision).
+
+    IMPORTANT : la reponse ACCORD n'est PAS reformulee par Gemini car elle
+    contient le menu "1 - Livraison / 2 - Boutique" que le parcours commande
+    doit pouvoir parser. Les montants et decisions viennent toujours des regles.
+    """
     if strategie == "ACCEPTER":
         reponse = ("Super, marche conclu ! " + produit.nom + " a " + str(int(prix_propose)) + " FCFA. "
                   "Comment souhaitez-vous recuperer votre commande ?\n\n"
                   "1 - Livraison a domicile\n"
                   "2 - Je viens en boutique")
-        return ("ACCORD", reponse)
+        return ("ACCORD", reponse, None, "acceptation")
     elif strategie == "REFUSER":
-        return ("REFUS", "Desole, je ne peux pas descendre en dessous de " + str(int(produit.prix_plancher)) + " FCFA. C est mon prix minimum.")
+        reponse = "Desole, je ne peux pas descendre en dessous de " + str(int(produit.prix_plancher)) + " FCFA. C est mon prix minimum."
+        return ("REFUS", reponse, None, "refus")
     elif strategie == "DERNIERE_OFFRE":
-        return ("NEGOCIATION", "Derniere offre : " + produit.nom + " a " + str(int(produit.prix_cible)) + " FCFA. C est vraiment mon meilleur prix !")
+        reponse = "Derniere offre : " + produit.nom + " a " + str(int(produit.prix_cible)) + " FCFA. C est vraiment mon meilleur prix !"
+        return ("NEGOCIATION", reponse, float(produit.prix_cible), "derniere_offre")
     else:
         contre = int((produit.prix_affiche + produit.prix_cible) / 2)
         if prix_propose is None or nb_tours == 0:
-            return ("NEGOCIATION", "Bonjour ! Le " + produit.nom + " est a " + str(int(produit.prix_affiche)) + " FCFA. C est de la qualite superieure ! Je peux faire un effort pour vous.")
+            reponse = "Bonjour ! Le " + produit.nom + " est a " + str(int(produit.prix_affiche)) + " FCFA. C est de la qualite superieure ! Je peux faire un effort pour vous."
+            return ("NEGOCIATION", reponse, None, "accueil")
         else:
-            return ("NEGOCIATION", "Hmm " + str(int(prix_propose)) + " FCFA c est un peu juste. Je peux vous faire " + str(contre) + " FCFA, c est mon meilleur effort !")
+            reponse = "Hmm " + str(int(prix_propose)) + " FCFA c est un peu juste. Je peux vous faire " + str(contre) + " FCFA, c est mon meilleur effort !"
+            return ("NEGOCIATION", reponse, float(contre), "contre_offre")
 
 
 def get_etape(conversation_id, db):
@@ -241,13 +252,32 @@ def traiter_message(commercant_id, produit_id, client_telephone, client_nom, mes
             else:
                 return sauver_reponse("Votre numero de telephone pour finaliser ?")
 
+    # ========== PHASE DE NEGOCIATION (avec reformulation Gemini) ==========
     historique = db.query(Message).filter(
         Message.conversation_id == conversation.id
     ).order_by(Message.created_at).all()
     nb_tours = len([m for m in historique if m.expediteur == "CLIENT"])
     prix_propose = extraire_prix(message)
     strategie = decider_strategie(prix_propose, produit, nb_tours) if prix_propose else "NEGOCIER"
-    resultat, reponse = generer_reponse_negociation(message, produit, strategie, prix_propose, nb_tours)
+    resultat, reponse, contre_offre, decision = generer_reponse_negociation(message, produit, strategie, prix_propose, nb_tours)
+
+    # Reformulation Gemini : uniquement pour les reponses de negociation.
+    # La reponse ACCORD garde son menu 1/2 intact (indispensable au parcours commande).
+    if resultat in ("NEGOCIATION", "REFUS"):
+        historique_dicts = [
+            {"role": "client" if m.expediteur == "CLIENT" else "bot", "contenu": m.contenu}
+            for m in historique
+        ]
+        reponse = reformuler_reponse(
+            message_client=message,
+            reponse_moteur=reponse,
+            nom_produit=produit.nom,
+            prix_affiche=float(produit.prix_affiche),
+            prix_propose=prix_propose,
+            contre_offre=contre_offre,
+            decision=decision,
+            historique=historique_dicts,
+        )
 
     msg_bot = Message(conversation_id=conversation.id, expediteur="BOT", contenu=reponse, prix_propose=prix_propose)
     db.add(msg_bot)
