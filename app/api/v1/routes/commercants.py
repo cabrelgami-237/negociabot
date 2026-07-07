@@ -20,7 +20,7 @@ def inscrire_commercant(data: CommercantCreate, db: Session = Depends(get_db)):
             detail="Un compte avec cet email existe déjà"
         )
 
-    # Créer le nouveau commerçant
+    # Créer le nouveau commerçant avec période d'essai gratuite
     nouveau = Commercant(
         nom_boutique=data.nom_boutique,
         email=data.email,
@@ -28,7 +28,7 @@ def inscrire_commercant(data: CommercantCreate, db: Session = Depends(get_db)):
         mot_de_passe_hash=hacher_mot_de_passe(data.mot_de_passe),
         domaine_activite=data.domaine_activite,
         plan_abonnement="GRATUIT",
-        abonnement_actif=False
+        abonnement_actif=True
     )
 
     db.add(nouveau)
