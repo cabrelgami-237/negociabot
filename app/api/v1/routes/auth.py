@@ -3,9 +3,15 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.commercant import Commercant
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import (
+    LoginRequest,
+    TokenResponse,
+    RegisterRequest,
+    RegisterResponse
+)
 from app.core.security import (
     verifier_mot_de_passe,
+    hacher_mot_de_passe,
     creer_token_acces,
     decoder_token
 )
@@ -13,9 +19,41 @@ from app.core.security import (
 router = APIRouter(prefix="/auth", tags=["Authentification"])
 
 
+@router.post("/register", response_model=RegisterResponse, status_code=201)
+def creer_compte(data: RegisterRequest, db: Session = Depends(get_db)):
+    # Vérifier si l'email existe déjà
+    existant = db.query(Commercant).filter(
+        func.lower(Commercant.email) == data.email.lower()
+    ).first()
+    if existant:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Un compte avec cet email existe deja"
+        )
+
+    nouveau = Commercant(
+        nom_boutique=data.nom_boutique,
+        email=data.email,
+        telephone=data.telephone,
+        mot_de_passe_hash=hacher_mot_de_passe(data.mot_de_passe),
+        domaine_activite=data.domaine_activite,
+        plan_abonnement="GRATUIT",
+        abonnement_actif=True
+    )
+    db.add(nouveau)
+    db.commit()
+    db.refresh(nouveau)
+
+    return RegisterResponse(
+        commercant_id=nouveau.id,
+        nom_boutique=nouveau.nom_boutique,
+        email=nouveau.email,
+        plan_abonnement=nouveau.plan_abonnement
+    )
+
+
 @router.post("/login", response_model=TokenResponse)
 def se_connecter(data: LoginRequest, db: Session = Depends(get_db)):
-    # Chercher le commerçant dans la base de données
     commercant = db.query(Commercant).filter(
         func.lower(Commercant.email) == data.email.lower()
     ).first()
