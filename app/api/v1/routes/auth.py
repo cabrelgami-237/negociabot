@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from app.database.database import get_db
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/auth", tags=["Authentification"])
 def se_connecter(data: LoginRequest, db: Session = Depends(get_db)):
     # Chercher le commerçant dans la base de données
     commercant = db.query(Commercant).filter(
-        Commercant.email == data.email
+        func.lower(Commercant.email) == data.email.lower()
     ).first()
 
     if not commercant:
