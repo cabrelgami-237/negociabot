@@ -137,7 +137,7 @@ def traiter_message(commercant_id, produit_id, client_telephone, client_nom, mes
         }
 
     if etape == ETAPE_CHOIX:
-        if "1" in message or "livraison" in message_lower or "domicile" in message_lower:
+        if message.strip() == "1" or "livraison" in message_lower or "domicile" in message_lower:
             commande = Commande(
                 conversation_id=conversation.id,
                 commercant_id=commercant_id,
