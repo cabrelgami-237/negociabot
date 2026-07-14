@@ -63,7 +63,9 @@ export default function Dashboard() {
             {data.abonnement.plan}
           </p>
           <p style={{fontSize: '12px', color: '#999'}}>
-            Expire le {new Date(data.abonnement.date_fin).toLocaleDateString('fr-FR')}
+            {data.abonnement.date_fin
+              ? `Expire le ${new Date(data.abonnement.date_fin).toLocaleDateString('fr-FR')}`
+              : 'Illimité'}
           </p>
         </div>
       </div>
