@@ -18,7 +18,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = "gemini-2.5-flash"  # gratuit, ~1500 requetes/jour
+GEMINI_MODEL = "gemini-2.0-flash"  # gratuit, modele actuellement disponible
 
 _client = None
 
