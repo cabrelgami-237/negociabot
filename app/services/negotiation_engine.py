@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.models.produit import Produit
 from app.models.conversation import Conversation, Message
@@ -116,6 +117,31 @@ def traiter_message(commercant_id, produit_id, client_telephone, client_nom, mes
         db.add(conversation)
         db.commit()
         db.refresh(conversation)
+
+    # Protection anti-doublon : si le dernier message client etait identique
+    # et a deja recu une reponse il y a moins de 15 secondes, on renvoie
+    # la meme reponse sans re-traiter (evite les doubles clics / retries reseau).
+    derniers = db.query(Message).filter(
+        Message.conversation_id == conversation.id
+    ).order_by(Message.created_at.desc()).limit(2).all()
+
+    if len(derniers) == 2:
+        dernier, avant_dernier = derniers[0], derniers[1]
+        if (dernier.expediteur == "BOT"
+                and avant_dernier.expediteur == "CLIENT"
+                and avant_dernier.contenu == message):
+            maintenant = datetime.now(timezone.utc)
+            cree_le = avant_dernier.created_at
+            if cree_le.tzinfo is None:
+                cree_le = cree_le.replace(tzinfo=timezone.utc)
+            if (maintenant - cree_le).total_seconds() < 15:
+                return {
+                    "conversation_id": conversation.id,
+                    "reponse_bot": dernier.contenu,
+                    "prix_propose": dernier.prix_propose,
+                    "statut": conversation.statut,
+                    "prix_final": conversation.prix_final
+                }
 
     msg_client = Message(conversation_id=conversation.id, expediteur="CLIENT", contenu=message)
     db.add(msg_client)
