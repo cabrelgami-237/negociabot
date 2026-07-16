@@ -18,25 +18,25 @@ export default function Dashboard() {
 
   return (
     <div className="page-container" style={styles.container}>
-      <h2 style={styles.titre}>Bonjour, {nom_boutique}</h2>
+      <h2 style={styles.titre}>Bonjour, {nom_boutique || 'Commercant'}</h2>
       <p style={styles.sousTitre}>Voici le resume de votre activite</p>
 
       <div className="grid-4" style={{ marginBottom: '20px' }}>
         <div className="card" style={{ borderTop: '4px solid #1A73E8', textAlign: 'center' }}>
           <p style={styles.carteLabel}>Total negociations</p>
-          <p style={styles.carteValeur}>{data.negotiations.total}</p>
+          <p style={styles.carteValeur}>{data.negotiations?.total ?? 0}</p>
         </div>
         <div className="card" style={{ borderTop: '4px solid #2ecc71', textAlign: 'center' }}>
           <p style={styles.carteLabel}>Acceptees</p>
-          <p style={styles.carteValeur}>{data.negotiations.acceptees}</p>
+          <p style={styles.carteValeur}>{data.negotiations?.acceptees ?? 0}</p>
         </div>
         <div className="card" style={{ borderTop: '4px solid #e74c3c', textAlign: 'center' }}>
           <p style={styles.carteLabel}>Refusees</p>
-          <p style={styles.carteValeur}>{data.negotiations.refusees}</p>
+          <p style={styles.carteValeur}>{data.negotiations?.refusees ?? 0}</p>
         </div>
         <div className="card" style={{ borderTop: '4px solid #f39c12', textAlign: 'center' }}>
           <p style={styles.carteLabel}>En cours</p>
-          <p style={styles.carteValeur}>{data.negotiations.en_cours}</p>
+          <p style={styles.carteValeur}>{data.negotiations?.en_cours ?? 0}</p>
         </div>
       </div>
 
@@ -44,26 +44,26 @@ export default function Dashboard() {
         <div className="card" style={{ textAlign: 'center' }}>
           <p style={styles.carteLabel}>Chiffre d affaires</p>
           <p style={{ ...styles.carteValeur, color: '#2ecc71' }}>
-            {data.chiffre_affaires.total_fcfa.toLocaleString()} FCFA
+            {data.chiffre_affaires?.total_fcfa?.toLocaleString() || '0'} FCFA
           </p>
         </div>
         <div className="card" style={{ textAlign: 'center' }}>
           <p style={styles.carteLabel}>Taux de succes</p>
           <p style={{ ...styles.carteValeur, color: '#1A73E8' }}>
-            {data.negotiations.taux_succes}%
+            {data.negotiations?.taux_succes ?? 0}%
           </p>
         </div>
         <div className="card" style={{ textAlign: 'center' }}>
           <p style={styles.carteLabel}>Produits actifs</p>
-          <p style={styles.carteValeur}>{data.produits_actifs}</p>
+          <p style={styles.carteValeur}>{data.produits_actifs ?? 0}</p>
         </div>
         <div className="card" style={{ textAlign: 'center' }}>
           <p style={styles.carteLabel}>Abonnement</p>
           <p style={{ ...styles.carteValeur, fontSize: '17px', color: '#9b59b6' }}>
-            {data.abonnement.plan}
+            {data.abonnement?.plan || 'Gratuit'}
           </p>
           <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0 }}>
-            {data.abonnement.date_fin
+            {data.abonnement?.date_fin
               ? `Expire le ${new Date(data.abonnement.date_fin).toLocaleDateString('fr-FR')}`
               : 'Illimite'}
           </p>
