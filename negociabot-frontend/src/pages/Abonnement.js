@@ -130,7 +130,19 @@ export default function Abonnement() {
                     borderColor: estActif ? plan.color : '#E2E8F0',
                     borderWidth: estActif ? '3px' : '1px',
                     position: 'relative',
-                    transform: plan.popular && !estActif ? 'scale(1.02)' : 'scale(1)',
+                    transform: 'scale(1)',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!estActif) {
+                      e.currentTarget.style.transform = 'scale(1.03)';
+                      e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.15)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
                   }}
                 >
                   {plan.popular && !estActif && (
@@ -227,9 +239,10 @@ const styles = {
   
   grille: { 
     display: 'grid', 
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+    gridTemplateColumns: 'repeat(3, 1fr)', 
     gap: '24px',
-    marginBottom: '30px'
+    marginBottom: '30px',
+    alignItems: 'stretch',
   },
   carte: { 
     padding: '28px 20px 20px', 
@@ -237,8 +250,10 @@ const styles = {
     flexDirection: 'column', 
     alignItems: 'center',
     position: 'relative',
-    transition: 'transform 0.2s, box-shadow 0.2s',
     borderRadius: '16px',
+    background: 'white',
+    height: '100%',
+    minHeight: '380px',
   },
   badge: {
     position: 'absolute',
@@ -261,7 +276,8 @@ const styles = {
     padding: 0, 
     margin: '0 0 20px 0', 
     width: '100%',
-    textAlign: 'left'
+    textAlign: 'left',
+    flex: 1,
   },
   featureItem: { 
     padding: '6px 0', 
@@ -283,6 +299,7 @@ const styles = {
     fontWeight: 700,
     fontSize: '15px',
     transition: 'opacity 0.2s, transform 0.2s',
+    marginTop: 'auto',
   },
   paiementInfo: {
     marginTop: '12px',
@@ -290,7 +307,9 @@ const styles = {
     color: '#64748B',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px'
+    justifyContent: 'center',
+    gap: '6px',
+    width: '100%',
   },
   
   etapes: { padding: '24px', background: '#F8FAFC' },
