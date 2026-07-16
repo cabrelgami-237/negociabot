@@ -1,0 +1,145 @@
+﻿import React, { useState } from 'react';
+import { login } from '../services/api';
+
+export default function Login({ onLogin, onInscription }) {
+  const [email, setEmail] = useState('');
+  const [motDePasse, setMotDePasse] = useState('');
+  const [erreur, setErreur] = useState('');
+  const [chargement, setChargement] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setChargement(true);
+    setErreur('');
+    try {
+      const res = await login(email, motDePasse);
+      const data = res.data;
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('commercant_id', data.commercant_id);
+      localStorage.setItem('nom_boutique', data.nom_boutique);
+      onLogin(data);
+    } catch (err) {
+      setErreur(err.response?.data?.detail || 'Erreur de connexion');
+    }
+    setChargement(false);
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.logo}>ðŸ¤ NÃ©gociaBot</h1>
+        <p style={styles.sousTitre}>SystÃ¨me de nÃ©gociation IA - Cameroun</p>
+
+        <form onSubmit={handleSubmit}>
+          <div style={styles.champ}>
+            <label style={styles.label}>Email</label>
+            <input
+              style={styles.input}
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="votre@email.com"
+              required
+            />
+          </div>
+
+          <div style={styles.champ}>
+            <label style={styles.label}>Mot de passe</label>
+            <input
+              style={styles.input}
+              type="password"
+              value={motDePasse}
+              onChange={(e) => setMotDePasse(e.target.value)}
+              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              required
+            />
+          </div>
+
+          {erreur && <p style={styles.erreur}>{String(erreur)}</p>}
+
+          <button style={styles.bouton} type="submit" disabled={chargement}>
+            {chargement ? 'Connexion...' : 'Se connecter'}
+          </button>
+        </form>
+
+        <p style={styles.lien}>
+          Pas encore de compte ?{' '}
+          <span style={styles.lienTexte} onClick={onInscription}>
+            CrÃ©er un compte
+          </span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  card: {
+    background: 'white',
+    borderRadius: '16px',
+    padding: '40px',
+    width: '380px',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+  },
+  logo: {
+    textAlign: 'center',
+    fontSize: '28px',
+    color: '#0f3460',
+    marginBottom: '8px',
+  },
+  sousTitre: {
+    textAlign: 'center',
+    color: '#666',
+    fontSize: '14px',
+    marginBottom: '30px',
+  },
+  champ: { marginBottom: '20px' },
+  label: { display: 'block', marginBottom: '6px', fontWeight: '600', color: '#333' },
+  input: {
+    width: '100%',
+    padding: '12px',
+    border: '2px solid #e0e0e0',
+    borderRadius: '8px',
+    fontSize: '15px',
+    boxSizing: 'border-box',
+    outline: 'none',
+  },
+  erreur: {
+    color: '#e74c3c',
+    background: '#ffeaea',
+    padding: '10px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    marginBottom: '15px',
+  },
+  bouton: {
+    width: '100%',
+    padding: '14px',
+    background: 'linear-gradient(135deg, #0f3460, #e94560)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '16px',
+    fontWeight: '700',
+    cursor: 'pointer',
+  },
+  lien: {
+    textAlign: 'center',
+    marginTop: '20px',
+    fontSize: '14px',
+    color: '#666',
+  },
+  lienTexte: {
+    color: '#e94560',
+    fontWeight: '700',
+    cursor: 'pointer',
+    textDecoration: 'underline',
+  },
+};
