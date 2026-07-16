@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { register, login } from '../services/api';
+import logo from '../assets/logo-negociabot.jpeg';
 
 export default function Inscription({ onLogin, onRetourLogin }) {
   const [nomBoutique, setNomBoutique] = useState('');
@@ -20,7 +21,7 @@ export default function Inscription({ onLogin, onRetourLogin }) {
       return;
     }
     if (motDePasse.length < 6) {
-      setErreur('Le mot de passe doit contenir au moins 6 caracteres');
+      setErreur('Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
 
@@ -34,7 +35,6 @@ export default function Inscription({ onLogin, onRetourLogin }) {
         domaine_activite: domaineActivite,
       });
 
-      // Connexion automatique apres inscription reussie
       const res = await login(email, motDePasse);
       const data = res.data;
       localStorage.setItem('token', data.access_token);
@@ -50,7 +50,7 @@ export default function Inscription({ onLogin, onRetourLogin }) {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.logo}>🤝 NégociaBot</h1>
+        <img src={logo} alt="NégociaBot" style={styles.logoImg} />
         <p style={styles.sousTitre}>Créez votre compte commerçant</p>
 
         <form onSubmit={handleSubmit}>
@@ -128,7 +128,7 @@ export default function Inscription({ onLogin, onRetourLogin }) {
 
           {erreur && <p style={styles.erreur}>{String(erreur)}</p>}
 
-          <button style={styles.bouton} type="submit" disabled={chargement}>
+          <button className="btn btn-block" style={styles.bouton} type="submit" disabled={chargement}>
             {chargement ? 'Création du compte...' : "S'inscrire"}
           </button>
         </form>
@@ -147,7 +147,7 @@ export default function Inscription({ onLogin, onRetourLogin }) {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+    background: 'linear-gradient(135deg, #0A3D62 0%, #0f2942 100%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -158,26 +158,27 @@ const styles = {
     borderRadius: '16px',
     padding: '40px',
     width: '380px',
+    maxWidth: '100%',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
   },
-  logo: {
-    textAlign: 'center',
-    fontSize: '28px',
-    color: '#0f3460',
-    marginBottom: '8px',
+  logoImg: {
+    display: 'block',
+    margin: '0 auto 12px',
+    width: '160px',
+    height: 'auto',
   },
   sousTitre: {
     textAlign: 'center',
-    color: '#666',
+    color: '#64748B',
     fontSize: '14px',
     marginBottom: '30px',
   },
   champ: { marginBottom: '20px' },
-  label: { display: 'block', marginBottom: '6px', fontWeight: '600', color: '#333' },
+  label: { display: 'block', marginBottom: '6px', fontWeight: '600', color: '#1E293B' },
   input: {
     width: '100%',
     padding: '12px',
-    border: '2px solid #e0e0e0',
+    border: '2px solid #E2E8F0',
     borderRadius: '8px',
     fontSize: '15px',
     boxSizing: 'border-box',
@@ -192,24 +193,18 @@ const styles = {
     marginBottom: '15px',
   },
   bouton: {
-    width: '100%',
-    padding: '14px',
-    background: 'linear-gradient(135deg, #0f3460, #e94560)',
+    background: '#1A73E8',
     color: 'white',
-    border: 'none',
-    borderRadius: '8px',
     fontSize: '16px',
-    fontWeight: '700',
-    cursor: 'pointer',
   },
   lien: {
     textAlign: 'center',
     marginTop: '20px',
     fontSize: '14px',
-    color: '#666',
+    color: '#64748B',
   },
   lienTexte: {
-    color: '#e94560',
+    color: '#1A73E8',
     fontWeight: '700',
     cursor: 'pointer',
     textDecoration: 'underline',

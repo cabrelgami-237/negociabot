@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { login } from '../services/api';
+import logo from '../assets/logo-negociabot.jpeg';
 
 export default function Login({ onLogin, onInscription }) {
   const [email, setEmail] = useState('');
@@ -27,9 +28,8 @@ export default function Login({ onLogin, onInscription }) {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.logo}>🤝 NégociaBot</h1>
-        <p style={styles.sousTitre}>Système de négociation IA - Cameroun</p>
-
+        <img src={logo} alt="NégociaBot" style={styles.logoImg} />
+        <p style={styles.sousTitre}>Système de négociation IA — Cameroun</p>
         <form onSubmit={handleSubmit}>
           <div style={styles.champ}>
             <label style={styles.label}>Email</label>
@@ -42,7 +42,6 @@ export default function Login({ onLogin, onInscription }) {
               required
             />
           </div>
-
           <div style={styles.champ}>
             <label style={styles.label}>Mot de passe</label>
             <input
@@ -54,14 +53,11 @@ export default function Login({ onLogin, onInscription }) {
               required
             />
           </div>
-
           {erreur && <p style={styles.erreur}>{String(erreur)}</p>}
-
-          <button style={styles.bouton} type="submit" disabled={chargement}>
+          <button className="btn btn-block" style={styles.bouton} type="submit" disabled={chargement}>
             {chargement ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
-
         <p style={styles.lien}>
           Pas encore de compte ?{' '}
           <span style={styles.lienTexte} onClick={onInscription}>
@@ -76,36 +72,38 @@ export default function Login({ onLogin, onInscription }) {
 const styles = {
   container: {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+    background: 'linear-gradient(135deg, #0A3D62 0%, #0f2942 100%)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: '20px',
   },
   card: {
     background: 'white',
     borderRadius: '16px',
     padding: '40px',
     width: '380px',
+    maxWidth: '100%',
     boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
   },
-  logo: {
-    textAlign: 'center',
-    fontSize: '28px',
-    color: '#0f3460',
-    marginBottom: '8px',
+  logoImg: {
+    display: 'block',
+    margin: '0 auto 12px',
+    width: '160px',
+    height: 'auto',
   },
   sousTitre: {
     textAlign: 'center',
-    color: '#666',
+    color: '#64748B',
     fontSize: '14px',
     marginBottom: '30px',
   },
   champ: { marginBottom: '20px' },
-  label: { display: 'block', marginBottom: '6px', fontWeight: '600', color: '#333' },
+  label: { display: 'block', marginBottom: '6px', fontWeight: '600', color: '#1E293B' },
   input: {
     width: '100%',
     padding: '12px',
-    border: '2px solid #e0e0e0',
+    border: '2px solid #E2E8F0',
     borderRadius: '8px',
     fontSize: '15px',
     boxSizing: 'border-box',
@@ -120,24 +118,18 @@ const styles = {
     marginBottom: '15px',
   },
   bouton: {
-    width: '100%',
-    padding: '14px',
-    background: 'linear-gradient(135deg, #0f3460, #e94560)',
+    background: '#1A73E8',
     color: 'white',
-    border: 'none',
-    borderRadius: '8px',
     fontSize: '16px',
-    fontWeight: '700',
-    cursor: 'pointer',
   },
   lien: {
     textAlign: 'center',
     marginTop: '20px',
     fontSize: '14px',
-    color: '#666',
+    color: '#64748B',
   },
   lienTexte: {
-    color: '#e94560',
+    color: '#1A73E8',
     fontWeight: '700',
     cursor: 'pointer',
     textDecoration: 'underline',
